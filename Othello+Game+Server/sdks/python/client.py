@@ -15,6 +15,7 @@ def num_outflanks(row, column, player, board):
   for dir in directions:
     r, c = row + dir[0], column + dir[1]
 
+    # skip spots that exceed the board size or hold our player's piece
     if not (0 <= r < BOARD_SIZE and 0 <= c < BOARD_SIZE):
       continue
     if board[r][c] == 0 or board[r][c] == player:
@@ -30,15 +31,20 @@ def num_outflanks(row, column, player, board):
   return 0
     
 def get_best_move(player, board):
+  # find all possible moves/outcomes
   possible_moves = []
   flips = []
+
   for i in range(BOARD_SIZE):
     for j in range(BOARD_SIZE):
       if board[i][j] == 0:
         if num_outflanks(i, j, player, board) != 0:
           possible_moves.append([i, j])
-          flips.append(num_outflanks(i, j, player, board))       
+          flips.append(num_outflanks(i, j, player, board))  
+  
+  # store and return the move with the most possible outflanks
   max_flips_move = possible_moves[max(range(len(flips)), key=flips.__getitem__)]
+
   return max_flips_move
 
 
