@@ -3,13 +3,15 @@
 import sys
 import json
 import socket
-import random
 
 BOARD_SIZE = 8
 
-def is_valid_move(row, column, player, board):
+
+def num_outflanks(row, column, player, board):
   # check all adjacent paths
   directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1)]
+  flips = 0
+  
   for dir in directions:
     r, c = row + dir[0], column + dir[1]
 
@@ -21,30 +23,29 @@ def is_valid_move(row, column, player, board):
     # Keep moving in this direction until we find our player's piece or an empty spot
     while 0 <= r < BOARD_SIZE and 0 <= c < BOARD_SIZE and board[r][c] != 0:
       if board[r][c] == player:
-        return True
+        return flips
+      flips += 1
       r, c = r + dir[0], c + dir[1]
-  return False
+ 
+  return 0
     
-def get_possible_moves(player, board):
+def get_best_move(player, board):
   possible_moves = []
+  flips = []
   for i in range(BOARD_SIZE):
     for j in range(BOARD_SIZE):
       if board[i][j] == 0:
-        if is_valid_move(i, j, player, board):
+        if num_outflanks(i, j, player, board) != 0:
           possible_moves.append([i, j])
-  return possible_moves
+          flips.append(num_outflanks(i, j, player, board))       
+  max_flips_move = possible_moves[max(range(len(flips)), key=flips.__getitem__)]
+  return max_flips_move
+
 
 def get_move(player, board):
-  # TODO determine valid moves
-  possible_moves = get_possible_moves(player, board)
-  if possible_moves:
-    return random.choice(possible_moves)
-  else:
-    return None
+  return get_best_move(player, board)
   
-  # TODO determine best move
         
-
 def prepare_response(move):
   response = '{}\n'.format(move).encode()
   print('sending {!r}'.format(response))
