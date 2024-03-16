@@ -3,11 +3,47 @@
 import sys
 import json
 import socket
+import random
+
+BOARD_SIZE = 8
+
+def is_valid_move(row, column, player, board):
+  # check all adjacent paths
+  directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1)]
+  for dir in directions:
+    r, c = row + dir[0], column + dir[1]
+
+    if not (0 <= r < BOARD_SIZE and 0 <= c < BOARD_SIZE):
+      continue
+    if board[r][c] == 0 or board[r][c] == player:
+      continue
+
+    # Keep moving in this direction until we find our player's piece or an empty spot
+    while 0 <= r < BOARD_SIZE and 0 <= c < BOARD_SIZE and board[r][c] != 0:
+      if board[r][c] == player:
+        return True
+      r, c = r + dir[0], c + dir[1]
+  return False
+    
+def get_possible_moves(player, board):
+  possible_moves = []
+  for i in range(BOARD_SIZE):
+    for j in range(BOARD_SIZE):
+      if board[i][j] == 0:
+        if is_valid_move(i, j, player, board):
+          possible_moves.append([i, j])
+  return possible_moves
 
 def get_move(player, board):
   # TODO determine valid moves
+  possible_moves = get_possible_moves(player, board)
+  if possible_moves:
+    return random.choice(possible_moves)
+  else:
+    return None
+  
   # TODO determine best move
-  return [2, 3]
+        
 
 def prepare_response(move):
   response = '{}\n'.format(move).encode()
